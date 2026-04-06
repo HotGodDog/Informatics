@@ -310,18 +310,18 @@ def cte_requests():
     for row in cursor.fetchall():
         print(f"   {row[3]}: {row[0]} {row[1]} - балл {row[2]}, место {row[4]}")
 
-# create_data_base()
+create_data_base()
 
-# load_from_csv('уровень_обучения.csv', 'уровень_обучения')
-# load_from_csv('направления.csv', 'направления')
-# load_from_csv('типы_обучения.csv', 'типы_обучения')
-# load_from_csv('студенты.csv', 'студенты')
+load_from_csv('уровень_обучения.csv', 'уровень_обучения')
+load_from_csv('направления.csv', 'направления')
+load_from_csv('типы_обучения.csv', 'типы_обучения')
+load_from_csv('студенты.csv', 'студенты')
 
-# show_table()
+show_table()
 
-# simple_requests()
+simple_requests()
 
-# case_requests()
+case_requests()
 
 # subqueries()
 
