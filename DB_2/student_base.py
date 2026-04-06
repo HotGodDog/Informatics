@@ -323,6 +323,6 @@ simple_requests()
 
 case_requests()
 
-# subqueries()
+subqueries()
 
-# cte_requests()
+cte_requests()
