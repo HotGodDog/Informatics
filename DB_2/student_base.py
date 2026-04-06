@@ -69,12 +69,12 @@ def load_from_csv(filename, table_name):
         print(f"Ошибка: {e}")
 
 
-# create_data_base()
+create_data_base()
 
-# load_from_csv('уровень_обучения.csv', 'уровень_обучения')
-# load_from_csv('направления.csv', 'направления')
-# load_from_csv('типы_обучения.csv', 'типы_обучения')
-# load_from_csv('студенты.csv', 'студенты')
+load_from_csv('уровень_обучения.csv', 'уровень_обучения')
+load_from_csv('направления.csv', 'направления')
+load_from_csv('типы_обучения.csv', 'типы_обучения')
+load_from_csv('студенты.csv', 'студенты')
 
 print("\nУровни обучения")
 cursor.execute("SELECT * FROM уровень_обучения")
