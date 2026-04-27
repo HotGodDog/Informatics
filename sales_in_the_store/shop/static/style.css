@@ -1,0 +1,228 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f2f5;
+    margin: 0;
+    padding: 20px;
+}
+.cashier-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+.cashier-select select {
+    padding: 8px;
+    font-size: 1rem;
+    border-radius: 6px;
+}
+.add-product {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+.add-methods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
+}
+.method-by-category, .method-by-id, .quantity {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.method-by-category select, .method-by-id input, .quantity input {
+    padding: 8px;
+    font-size: 1rem;
+    width: 200px;
+}
+button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+button:hover {
+    background: #45a049;
+}
+.product-info {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+.cart {
+    margin-bottom: 30px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+}
+.cart-item span {
+    flex: 1;
+}
+.remove-item {
+    background: #e74c3c;
+    padding: 4px 10px;
+}
+.checkout-area {
+    margin-top: 20px;
+    text-align: right;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
+#checkout-btn {
+    background: #2ecc71;
+    font-size: 1.1rem;
+    padding: 10px 25px;
+}
+#checkout-result {
+    margin-top: 10px;
+    text-align: left;
+}
+
+/* Блок статистики */
+.statistics {
+    margin-top: 30px;
+    border-top: 2px solid #eee;
+    padding-top: 15px;
+}
+.stats-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.stats-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.stats-row label {
+    font-weight: bold;
+}
+.stats-row select, .stats-row input {
+    padding: 6px;
+    font-size: 1rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+#stats-result {
+    background: #ecf0f1;
+    padding: 15px;
+    border-radius: 8px;
+    min-height: 100px;
+}
+.sales-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.sales-table th, .sales-table td {
+    border: 1px solid #bdc3c7;
+    padding: 8px;
+    text-align: left;
+}
+.sales-table th {
+    background: #3498db;
+    color: white;
+}
+.no-sales {
+    color: #7f8c8d;
+    font-style: italic;
+}
+.error {
+    color: red;
+}
+
+/* Таблица статистики */
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+.stats-table th, .stats-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+.stats-table th {
+    background-color: #f2f2f2;
+}
+.stats-total {
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-top: 15px;
+    text-align: right;
+    color: #27ae60;
+}
+
+/* Вкладки статистики */
+.stats-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+}
+.stats-tab-btn {
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    color: #555;
+}
+.stats-tab-btn.active {
+    background: #4CAF50;
+    color: white;
+}
+.stats-tab-content {
+    display: none;
+}
+.stats-tab-content.active {
+    display: block;
+}
+/* Таблицы статистики */
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+.stats-table th, .stats-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+.stats-table th {
+    background-color: #f2f2f2;
+}
+.stats-total {
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-top: 15px;
+    text-align: right;
+    color: #27ae60;
+}
+.no-sales {
+    color: #7f8c8d;
+    font-style: italic;
+    padding: 10px;
+}

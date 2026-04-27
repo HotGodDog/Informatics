@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `employees` (
 	`name` TEXT NOT NULL,
 	`surname` TEXT NOT NULL,
 	`id_job` INTEGER NOT NULL,
-FOREIGN KEY(``) REFERENCES `jobs_titles`(`id_job`)
+FOREIGN KEY(`id_job`) REFERENCES `jobs_titles`(`id_job`)
 );
 CREATE TABLE IF NOT EXISTS `receipts` (
 	`id_check` integer primary key NOT NULL UNIQUE,
@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS `sale_items` (
 	`id_sale` integer primary key NOT NULL UNIQUE,
 	`id_check` INTEGER NOT NULL,
 	`id_product` INTEGER NOT NULL,
-FOREIGN KEY(`id_check`) REFERENCES `receipts`(`id_check`),
-FOREIGN KEY(`id_product`) REFERENCES `products`(`id_product`)
+	`quantity` INTEGER NOT NULL,
+	FOREIGN KEY(`id_check`) REFERENCES `receipts`(`id_check`),
+	FOREIGN KEY(`id_product`) REFERENCES `products`(`id_product`)
 );

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Касса магазина</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="cashier-container">
+        <div class="header">
+            <h1>Касса магазина</h1>
+            <div class="cashier-select">
+                <label>Выберите кассира:</label>
+                <select id="cashier-select"></select>
+            </div>
+        </div>
+
+        <!-- Блок добавления товара (без изменений) -->
+        <div class="add-product">
+            <h2>Добавление товара</h2>
+            <div class="add-methods">
+                <div class="method-by-category">
+                    <label>Категория:</label>
+                    <select id="category-select"></select>
+                    <label>Товар:</label>
+                    <select id="product-select"></select>
+                </div>
+                <div class="method-by-id">
+                    <label>Или ID товара:</label>
+                    <input type="number" id="product-id-input" placeholder="Введите ID">
+                    <button id="load-product-btn">Загрузить товар</button>
+                </div>
+                <div class="quantity">
+                    <label>Количество:</label>
+                    <input type="number" id="quantity-input" value="1" min="1">
+                    <button id="add-to-cart-btn">Добавить в корзину</button>
+                </div>
+            </div>
+            <div id="product-info" class="product-info"></div>
+        </div>
+
+        <!-- Корзина -->
+        <div class="cart">
+            <h2>Корзина</h2>
+            <div id="cart-items"></div>
+            <div class="checkout-area">
+                <button id="checkout-btn">Оформить покупку</button>
+                <div id="checkout-result"></div>
+            </div>
+        </div>
+
+        <!-- СТАТИСТИКА: две вкладки -->
+        <div class="statistics">
+            <div class="stats-tabs">
+                <button class="stats-tab-btn active" data-tab="checks">Статистика по чекам</button>
+                <button class="stats-tab-btn" data-tab="products">Статистика по товарам</button>
+            </div>
+
+            <!-- Вкладка "Статистика по чекам" -->
+            <div id="checks-stats" class="stats-tab-content active">
+                <div class="stats-form">
+                    <label>Дата с: <input type="date" id="stats-date-from"></label>
+                    <label>Дата по: <input type="date" id="stats-date-to"></label>
+                    <label>Кассир: <select id="stats-cashier-select">
+                        <option value="all">Все кассиры</option>
+                    </select></label>
+                    <button id="load-stats-checks">Показать продажи</button>
+                </div>
+                <div id="stats-checks-result"></div>
+            </div>
+
+            <!-- Вкладка "Статистика по товарам" -->
+            <div id="products-stats" class="stats-tab-content">
+                <div class="stats-form">
+                    <label>Дата с: <input type="date" id="stats-products-date-from"></label>
+                    <label>Дата по: <input type="date" id="stats-products-date-to"></label>
+                    <label>Категория: <select id="stats-category-select">
+                        <option value="0">Все категории</option>
+                    </select></label>
+                    <button id="load-stats-products">Показать товары</button>
+                </div>
+                <div id="stats-products-result"></div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
