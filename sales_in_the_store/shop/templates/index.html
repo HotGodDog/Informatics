@@ -8,79 +8,104 @@
 </head>
 <body>
     <div class="cashier-container">
-        <div class="header">
-            <h1>Касса магазина</h1>
-            <div class="cashier-select">
+        <!-- Верхняя панель с кнопками переключения и выбором кассира -->
+        <div class="top-bar">
+            <div class="mode-switch">
+                <button id="mode-cash-btn" class="mode-btn active">Касса</button>
+                <button id="mode-stock-btn" class="mode-btn">Склад</button>
+            </div>
+            <div class="cashier-select" id="cashier-select-container">
                 <label>Выберите кассира:</label>
                 <select id="cashier-select"></select>
             </div>
         </div>
 
-        <!-- Блок добавления товара (без изменений) -->
-        <div class="add-product">
-            <h2>Добавление товара</h2>
-            <div class="add-methods">
-                <div class="method-by-category">
-                    <label>Категория:</label>
-                    <select id="category-select"></select>
-                    <label>Товар:</label>
-                    <select id="product-select"></select>
+        <!-- Режим КАССА -->
+        <div id="cash-mode" class="mode-content active">
+            <!-- Блок добавления товара -->
+            <div class="add-product">
+                <h2>Добавление товара</h2>
+                <div class="add-methods">
+                    <div class="method-by-category">
+                        <label>Категория:</label>
+                        <select id="category-select"></select>
+                        <label>Товар:</label>
+                        <select id="product-select"></select>
+                    </div>
+                    <div class="method-by-id">
+                        <label>Или ID товара:</label>
+                        <input type="number" id="product-id-input" placeholder="Введите ID">
+                        <button id="load-product-btn">Загрузить товар</button>
+                    </div>
+                    <div class="quantity">
+                        <label>Количество:</label>
+                        <input type="number" id="quantity-input" value="1" min="1">
+                        <button id="add-to-cart-btn">Добавить в корзину</button>
+                    </div>
                 </div>
-                <div class="method-by-id">
-                    <label>Или ID товара:</label>
-                    <input type="number" id="product-id-input" placeholder="Введите ID">
-                    <button id="load-product-btn">Загрузить товар</button>
-                </div>
-                <div class="quantity">
-                    <label>Количество:</label>
-                    <input type="number" id="quantity-input" value="1" min="1">
-                    <button id="add-to-cart-btn">Добавить в корзину</button>
+                <div id="product-info" class="product-info"></div>
+            </div>
+
+            <!-- Корзина -->
+            <div class="cart">
+                <h2>Корзина</h2>
+                <div id="cart-items"></div>
+                <div class="checkout-area">
+                    <button id="checkout-btn">Оформить покупку</button>
+                    <div id="checkout-result"></div>
                 </div>
             </div>
-            <div id="product-info" class="product-info"></div>
+
+            <!-- Статистика -->
+            <div class="statistics">
+                <div class="stats-tabs">
+                    <button class="stats-tab-btn active" data-tab="checks">Статистика по чекам</button>
+                    <button class="stats-tab-btn" data-tab="products">Статистика по товарам</button>
+                </div>
+                <div id="checks-stats" class="stats-tab-content active">
+                    <div class="stats-form">
+                        <label>Дата с: <input type="date" id="stats-date-from"></label>
+                        <label>Дата по: <input type="date" id="stats-date-to"></label>
+                        <label>Кассир: <select id="stats-cashier-select"><option value="all">Все кассиры</option></select></label>
+                        <button id="load-stats-checks">Показать продажи</button>
+                    </div>
+                    <div id="stats-checks-result"></div>
+                </div>
+                <div id="products-stats" class="stats-tab-content">
+                    <div class="stats-form">
+                        <label>Дата с: <input type="date" id="stats-products-date-from"></label>
+                        <label>Дата по: <input type="date" id="stats-products-date-to"></label>
+                        <label>Категория: <select id="stats-category-select"><option value="0">Все категории</option></select></label>
+                        <button id="load-stats-products">Показать товары</button>
+                    </div>
+                    <div id="stats-products-result"></div>
+                </div>
+            </div>
         </div>
 
-        <!-- Корзина -->
-        <div class="cart">
-            <h2>Корзина</h2>
-            <div id="cart-items"></div>
-            <div class="checkout-area">
-                <button id="checkout-btn">Оформить покупку</button>
-                <div id="checkout-result"></div>
-            </div>
-        </div>
-
-        <!-- СТАТИСТИКА: две вкладки -->
-        <div class="statistics">
-            <div class="stats-tabs">
-                <button class="stats-tab-btn active" data-tab="checks">Статистика по чекам</button>
-                <button class="stats-tab-btn" data-tab="products">Статистика по товарам</button>
-            </div>
-
-            <!-- Вкладка "Статистика по чекам" -->
-            <div id="checks-stats" class="stats-tab-content active">
-                <div class="stats-form">
-                    <label>Дата с: <input type="date" id="stats-date-from"></label>
-                    <label>Дата по: <input type="date" id="stats-date-to"></label>
-                    <label>Кассир: <select id="stats-cashier-select">
-                        <option value="all">Все кассиры</option>
-                    </select></label>
-                    <button id="load-stats-checks">Показать продажи</button>
+        <!-- Режим СКЛАД -->
+        <div id="stock-mode" class="mode-content">
+            <h2>Управление складом</h2>
+            <!-- Добавление нового товара -->
+            <div class="stock-add-form">
+                <h3>Добавить новый товар</h3>
+                <div class="form-row">
+                    <label>Название: <input type="text" id="new-product-name" placeholder="Название товара"></label>
+                    <label>Категория: <select id="new-product-category"></select></label>
+                    <label>Цена (руб): <input type="number" id="new-product-price" step="0.01" placeholder="Цена"></label>
+                    <label>Начальное количество: <input type="number" id="new-product-stock" value="0" min="0"></label>
+                    <button id="add-product-btn">Добавить товар</button>
                 </div>
-                <div id="stats-checks-result"></div>
+                <div id="add-product-message"></div>
             </div>
 
-            <!-- Вкладка "Статистика по товарам" -->
-            <div id="products-stats" class="stats-tab-content">
-                <div class="stats-form">
-                    <label>Дата с: <input type="date" id="stats-products-date-from"></label>
-                    <label>Дата по: <input type="date" id="stats-products-date-to"></label>
-                    <label>Категория: <select id="stats-category-select">
-                        <option value="0">Все категории</option>
-                    </select></label>
-                    <button id="load-stats-products">Показать товары</button>
+            <!-- Таблица всех товаров с возможностью пополнения -->
+            <div class="stock-list">
+                <h3>Товары на складе</h3>
+                <div class="stock-filter">
+                    <input type="text" id="stock-search" placeholder="Поиск по названию...">
                 </div>
-                <div id="stats-products-result"></div>
+                <div id="stock-table-container"></div>
             </div>
         </div>
     </div>

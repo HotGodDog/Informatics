@@ -5,10 +5,8 @@ import os
 
 app = Flask(__name__)
 
-# ----- Путь к базе данных -----
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(BASE_DIR, 'store.db')
-# -----------------------------
 
 def get_db():
     return sqlite3.connect(DATABASE)
@@ -17,6 +15,7 @@ def get_db():
 def index():
     return render_template('index.html')
 
+# ========== КАССА (без изменений) ==========
 @app.route('/api/cashiers')
 def get_cashiers():
     with get_db() as conn:
@@ -80,12 +79,10 @@ def purchase():
     data = request.get_json()
     cashier_id = data.get('cashier_id')
     items = data.get('items', [])
-
     if not cashier_id:
         return jsonify({'error': 'Не выбран кассир'}), 400
     if not items:
         return jsonify({'error': 'Корзина пуста'}), 400
-
     with get_db() as conn:
         cursor = conn.cursor()
         try:
@@ -97,11 +94,9 @@ def purchase():
                 row = cursor.fetchone()
                 if not row or row[0] < qty:
                     return jsonify({'error': f'Недостаточно товара: id {pid}'}), 400
-
             now_ts = datetime.now().timestamp()
             cursor.execute("INSERT INTO receipts (created_at, id_employee) VALUES (?, ?)", (now_ts, cashier_id))
             receipt_id = cursor.lastrowid
-
             total_sum = 0.0
             for item in items:
                 pid = item['product_id']
@@ -125,13 +120,12 @@ def purchase():
             conn.rollback()
             return jsonify({'error': str(e)}), 500
 
-# ---------- СТАТИСТИКА ПО ЧЕКАМ ----------
+# ========== СТАТИСТИКА (без изменений) ==========
 @app.route('/api/sales')
 def sales_stats():
     from_date = request.args.get('from')
     to_date = request.args.get('to')
     cashier_id = request.args.get('cashier_id')
-    
     if not from_date or not to_date:
         return jsonify({'error': 'Укажите from и to даты'}), 400
     try:
@@ -141,7 +135,6 @@ def sales_stats():
         end_ts = end.replace(hour=23, minute=59, second=59).timestamp()
     except:
         return jsonify({'error': 'Неверный формат даты'}), 400
-
     with get_db() as conn:
         cursor = conn.cursor()
         query = """
@@ -161,7 +154,6 @@ def sales_stats():
             query += " AND r.id_employee = ?"
             params.append(int(cashier_id))
         query += " GROUP BY r.id_check ORDER BY r.created_at DESC"
-        
         cursor.execute(query, params)
         rows = cursor.fetchall()
         receipts = []
@@ -174,13 +166,11 @@ def sales_stats():
             })
     return jsonify({'receipts': receipts})
 
-# ---------- СТАТИСТИКА ПО ТОВАРАМ (новая) ----------
 @app.route('/api/sales_by_products')
 def sales_by_products():
     from_date = request.args.get('from')
     to_date = request.args.get('to')
     category_id = request.args.get('category_id', 0, type=int)
-    
     if not from_date or not to_date:
         return jsonify({'error': 'Укажите from и to даты'}), 400
     try:
@@ -190,7 +180,6 @@ def sales_by_products():
         end_ts = end.replace(hour=23, minute=59, second=59).timestamp()
     except:
         return jsonify({'error': 'Неверный формат даты'}), 400
-
     with get_db() as conn:
         cursor = conn.cursor()
         query = """
@@ -209,7 +198,6 @@ def sales_by_products():
             query += " AND p.id_category = ?"
             params.append(category_id)
         query += " GROUP BY p.id_product ORDER BY total_quantity DESC"
-        
         cursor.execute(query, params)
         rows = cursor.fetchall()
         items = []
@@ -222,5 +210,78 @@ def sales_by_products():
             })
     return jsonify({'items': items})
 
+# ========== СКЛАД (новые маршруты) ==========
+@app.route('/api/all_products')
+def get_all_products():
+    """Возвращает все товары (включая с нулевым остатком) для управления складом."""
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT p.id_product, p.name_of_product, p.price, p.quantity_at_storage, c.name_category
+            FROM products p
+            JOIN categories c ON p.id_category = c.id_category
+            ORDER BY p.id_product
+        """)
+        rows = cursor.fetchall()
+    products = [{
+        'id': r[0],
+        'name': r[1],
+        'price': r[2],
+        'stock': r[3],
+        'category': r[4]
+    } for r in rows]
+    return jsonify(products)
+
+@app.route('/api/add_product', methods=['POST'])
+def add_product():
+    data = request.get_json()
+    name = data.get('name')
+    price = data.get('price')
+    category_id = data.get('category_id')
+    quantity = data.get('quantity', 0)
+    if not name or price is None or not category_id:
+        return jsonify({'error': 'Не все обязательные поля заполнены'}), 400
+    try:
+        price = float(price)
+        quantity = int(quantity)
+    except:
+        return jsonify({'error': 'Цена должна быть числом, количество – целым'}), 400
+    with get_db() as conn:
+        cursor = conn.cursor()
+        # Проверяем существование категории
+        cursor.execute("SELECT id_category FROM categories WHERE id_category = ?", (category_id,))
+        if not cursor.fetchone():
+            return jsonify({'error': 'Категория не найдена'}), 400
+        try:
+            cursor.execute("""
+                INSERT INTO products (name_of_product, price, id_category, quantity_at_storage)
+                VALUES (?, ?, ?, ?)
+            """, (name, price, category_id, quantity))
+            conn.commit()
+            new_id = cursor.lastrowid
+            return jsonify({'id': new_id, 'message': 'Товар добавлен'})
+        except sqlite3.IntegrityError:
+            return jsonify({'error': 'Товар с таким ID уже существует'}), 400
+
+@app.route('/api/replenish_stock', methods=['POST'])
+def replenish_stock():
+    data = request.get_json()
+    product_id = data.get('product_id')
+    add_quantity = data.get('add_quantity', 0)
+    if not product_id:
+        return jsonify({'error': 'Не указан товар'}), 400
+    if add_quantity <= 0:
+        return jsonify({'error': 'Количество для добавления должно быть больше 0'}), 400
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT quantity_at_storage FROM products WHERE id_product = ?", (product_id,))
+        row = cursor.fetchone()
+        if not row:
+            return jsonify({'error': 'Товар не найден'}), 404
+        new_stock = row[0] + add_quantity
+        cursor.execute("UPDATE products SET quantity_at_storage = ? WHERE id_product = ?", (new_stock, product_id))
+        conn.commit()
+    return jsonify({'message': 'Остаток обновлён', 'new_stock': new_stock})
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)

@@ -1,7 +1,15 @@
 let cart = [];
 let currentProduct = null;
+let allProductsStock = []; // для хранения списка товаров на складе
 
-// Элементы DOM
+// Элементы DOM – общие
+const modeCashBtn = document.getElementById('mode-cash-btn');
+const modeStockBtn = document.getElementById('mode-stock-btn');
+const cashMode = document.getElementById('cash-mode');
+const stockMode = document.getElementById('stock-mode');
+const cashierSelectContainer = document.getElementById('cashier-select-container');
+
+// Элементы для кассы (остаются те же)
 const cashierSelect = document.getElementById('cashier-select');
 const categorySelect = document.getElementById('category-select');
 const productSelect = document.getElementById('product-select');
@@ -14,21 +22,29 @@ const cartItemsDiv = document.getElementById('cart-items');
 const checkoutBtn = document.getElementById('checkout-btn');
 const checkoutResult = document.getElementById('checkout-result');
 
-// Для статистики по чекам
+// Статистика
 const statsDateFrom = document.getElementById('stats-date-from');
 const statsDateTo = document.getElementById('stats-date-to');
 const statsCashierSelect = document.getElementById('stats-cashier-select');
 const loadStatsChecksBtn = document.getElementById('load-stats-checks');
 const statsChecksResult = document.getElementById('stats-checks-result');
-
-// Для статистики по товарам
 const statsProductsDateFrom = document.getElementById('stats-products-date-from');
 const statsProductsDateTo = document.getElementById('stats-products-date-to');
 const statsCategorySelect = document.getElementById('stats-category-select');
 const loadStatsProductsBtn = document.getElementById('load-stats-products');
 const statsProductsResult = document.getElementById('stats-products-result');
 
-// --- Вспомогательная функция показа ошибок ---
+// Элементы для склада
+const newProductName = document.getElementById('new-product-name');
+const newProductCategory = document.getElementById('new-product-category');
+const newProductPrice = document.getElementById('new-product-price');
+const newProductStock = document.getElementById('new-product-stock');
+const addProductBtn = document.getElementById('add-product-btn');
+const addProductMessage = document.getElementById('add-product-message');
+const stockSearch = document.getElementById('stock-search');
+const stockTableContainer = document.getElementById('stock-table-container');
+
+// ---- Вспомогательная функция ошибок ----
 function showError(element, message) {
     element.innerHTML = `<span style="color:red;">${message}</span>`;
     setTimeout(() => {
@@ -38,7 +54,7 @@ function showError(element, message) {
     }, 4000);
 }
 
-// --- Загрузка кассиров ---
+// ---- ЗАГРУЗКА ДАННЫХ ДЛЯ КАССЫ ----
 async function loadCashiers() {
     const res = await fetch('/api/cashiers');
     const cashiers = await res.json();
@@ -56,14 +72,12 @@ async function loadCashiers() {
     });
 }
 
-// --- Загрузка категорий (для выбора товара и для фильтра статистики) ---
 async function loadCategories() {
     const res = await fetch('/api/categories');
     const categories = await res.json();
-    // для выбора товара
     categorySelect.innerHTML = '<option value="0">Все категории</option>';
-    // для фильтра статистики по товарам
     statsCategorySelect.innerHTML = '<option value="0">Все категории</option>';
+    newProductCategory.innerHTML = '<option value="">-- Выберите категорию --</option>';
     categories.forEach(c => {
         const option = document.createElement('option');
         option.value = c.id;
@@ -73,6 +87,10 @@ async function loadCategories() {
         optionStat.value = c.id;
         optionStat.textContent = c.name;
         statsCategorySelect.appendChild(optionStat);
+        const optionStock = document.createElement('option');
+        optionStock.value = c.id;
+        optionStock.textContent = c.name;
+        newProductCategory.appendChild(optionStock);
     });
     categorySelect.addEventListener('change', () => loadProductsByCategory(categorySelect.value));
     loadProductsByCategory(0);
@@ -109,7 +127,6 @@ async function loadProductsByCategory(categoryId) {
     });
 }
 
-// --- Загрузка товара по ID (исправлено: выводит зелёную надпись) ---
 loadProductBtn.addEventListener('click', async () => {
     const productId = productIdInput.value;
     if (!productId) {
@@ -134,7 +151,6 @@ loadProductBtn.addEventListener('click', async () => {
     }
 });
 
-// --- Добавление в корзину ---
 addToCartBtn.addEventListener('click', () => {
     if (!currentProduct) {
         showError(productInfo, 'Сначала выберите товар');
@@ -196,7 +212,6 @@ function renderCart() {
     });
 }
 
-// --- Оформление покупки ---
 checkoutBtn.addEventListener('click', async () => {
     const cashierId = cashierSelect.value;
     if (!cashierId) {
@@ -228,7 +243,7 @@ checkoutBtn.addEventListener('click', async () => {
     }
 });
 
-// --- СТАТИСТИКА ПО ЧЕКАМ ---
+// ---- СТАТИСТИКА (без изменений) ----
 async function loadChecksStats() {
     const dateFrom = statsDateFrom.value;
     const dateTo = statsDateTo.value;
@@ -251,25 +266,17 @@ async function loadChecksStats() {
         statsChecksResult.innerHTML = `<div class="no-sales">За выбранный период продаж не найдено.</div>`;
         return;
     }
-    let html = `<h3>Продажи с ${dateFrom} по ${dateTo}</h3>`;
-    html += `<table class="stats-table">
-                <thead>
-                    <tr><th>ID чека</th><th>Дата</th><th>Кассир</th><th>Сумма чека</th></tr>
-                </thead>
-                <tbody>`;
+    let html = `<h3>Продажи с ${dateFrom} по ${dateTo}</h3><table class="stats-table"><thead><tr><th>ID чека</th><th>Дата</th><th>Кассир</th><th>Сумма чека</th></tr></thead><tbody>`;
     let totalSum = 0;
     data.receipts.forEach(r => {
         totalSum += r.total;
         html += `<tr><td>${r.id_check}</td><td>${r.date}</td><td>${r.cashier_name}</td><td>${r.total.toFixed(2)} руб.</td></tr>`;
     });
-    html += `</tbody></table>`;
-    html += `<div class="stats-total">Общая сумма чеков: ${totalSum.toFixed(2)} руб.</div>`;
+    html += `</tbody></table><div class="stats-total">Общая сумма чеков: ${totalSum.toFixed(2)} руб.</div>`;
     statsChecksResult.innerHTML = html;
 }
-
 loadStatsChecksBtn.addEventListener('click', loadChecksStats);
 
-// --- СТАТИСТИКА ПО ТОВАРАМ ---
 async function loadProductsStats() {
     const dateFrom = statsProductsDateFrom.value;
     const dateTo = statsProductsDateTo.value;
@@ -289,38 +296,25 @@ async function loadProductsStats() {
         statsProductsResult.innerHTML = `<div class="no-sales">За выбранный период продаж товаров не найдено.</div>`;
         return;
     }
-    let html = `<h3>Проданные товары с ${dateFrom} по ${dateTo}</h3>`;
-    html += `<table class="stats-table">
-                <thead>
-                    <tr><th>ID товара</th><th>Наименование</th><th>Количество</th><th>Сумма</th></tr>
-                </thead>
-                <tbody>`;
+    let html = `<h3>Проданные товары с ${dateFrom} по ${dateTo}</h3><table class="stats-table"><thead><tr><th>ID товара</th><th>Наименование</th><th>Количество</th><th>Сумма</th></tr></thead><tbody>`;
     let totalSum = 0;
     data.items.forEach(item => {
         totalSum += item.sum;
         html += `<tr><td>${item.id}</td><td>${item.name}</td><td>${item.quantity}</td><td>${item.sum.toFixed(2)} руб.</td></tr>`;
     });
-    html += `</tbody></table>`;
-    html += `<div class="stats-total">Общая выручка: ${totalSum.toFixed(2)} руб.</div>`;
+    html += `</tbody></table><div class="stats-total">Общая выручка: ${totalSum.toFixed(2)} руб.</div>`;
     statsProductsResult.innerHTML = html;
 }
-
 loadStatsProductsBtn.addEventListener('click', loadProductsStats);
 
-// --- Переключение вкладок статистики ---
 function initStatsTabs() {
     const tabs = document.querySelectorAll('.stats-tab-btn');
     tabs.forEach(btn => {
         btn.addEventListener('click', () => {
             const tabId = btn.dataset.tab;
-            // переключить активный класс у кнопок
             tabs.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            // скрыть все контенты
-            document.querySelectorAll('.stats-tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            // показать выбранный контент
+            document.querySelectorAll('.stats-tab-content').forEach(content => content.classList.remove('active'));
             if (tabId === 'checks') {
                 document.getElementById('checks-stats').classList.add('active');
             } else {
@@ -330,7 +324,6 @@ function initStatsTabs() {
     });
 }
 
-// --- Установка сегодняшней даты по умолчанию ---
 function setDefaultDates() {
     const today = new Date().toISOString().slice(0,10);
     statsDateFrom.value = today;
@@ -339,7 +332,121 @@ function setDefaultDates() {
     statsProductsDateTo.value = today;
 }
 
-// --- Инициализация ---
+// ---- СКЛАД: загрузка всех товаров, добавление, пополнение ----
+async function loadAllProductsForStock() {
+    const res = await fetch('/api/all_products');
+    const products = await res.json();
+    allProductsStock = products;
+    renderStockTable(products);
+}
+
+function renderStockTable(products) {
+    const searchTerm = stockSearch.value.toLowerCase();
+    const filtered = products.filter(p => p.name.toLowerCase().includes(searchTerm));
+    if (filtered.length === 0) {
+        stockTableContainer.innerHTML = '<p>Товары не найдены.</p>';
+        return;
+    }
+    let html = `<table class="stats-table">
+        <thead><tr><th>ID</th><th>Название</th><th>Категория</th><th>Цена</th><th>Остаток</th><th>Пополнить</th></tr></thead>
+        <tbody>`;
+    filtered.forEach(p => {
+        html += `<tr>
+            <td>${p.id}</td>
+            <td>${p.name}</td>
+            <td>${p.category}</td>
+            <td>${p.price}</td>
+            <td>${p.stock}</td>
+            <td><input type="number" id="replenish-qty-${p.id}" value="1" min="1" style="width:70px;">
+                <button class="replenish-btn" data-id="${p.id}">Добавить</button>
+            </td>
+        </tr>`;
+    });
+    html += `</tbody></table>`;
+    stockTableContainer.innerHTML = html;
+    // Вешаем обработчики на кнопки пополнения
+    document.querySelectorAll('.replenish-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const productId = btn.dataset.id;
+            const qtyInput = document.getElementById(`replenish-qty-${productId}`);
+            let addQty = parseInt(qtyInput.value);
+            if (isNaN(addQty) || addQty < 1) addQty = 1;
+            const res = await fetch('/api/replenish_stock', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: productId, add_quantity: addQty })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showError(addProductMessage, `Остаток обновлён. Новый остаток: ${data.new_stock}`);
+                loadAllProductsForStock();
+            } else {
+                showError(addProductMessage, `Ошибка: ${data.error}`);
+            }
+        });
+    });
+}
+
+stockSearch.addEventListener('input', () => renderStockTable(allProductsStock));
+
+addProductBtn.addEventListener('click', async () => {
+    const name = newProductName.value.trim();
+    const categoryId = newProductCategory.value;
+    const price = parseFloat(newProductPrice.value);
+    const stock = parseInt(newProductStock.value);
+    if (!name) {
+        showError(addProductMessage, 'Введите название товара');
+        return;
+    }
+    if (!categoryId) {
+        showError(addProductMessage, 'Выберите категорию');
+        return;
+    }
+    if (isNaN(price) || price <= 0) {
+        showError(addProductMessage, 'Введите корректную цену (>0)');
+        return;
+    }
+    if (isNaN(stock) || stock < 0) stock = 0;
+    const res = await fetch('/api/add_product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, category_id: categoryId, price, quantity: stock })
+    });
+    const data = await res.json();
+    if (res.ok) {
+        showError(addProductMessage, `Товар "${name}" добавлен (ID ${data.id})`);
+        newProductName.value = '';
+        newProductPrice.value = '';
+        newProductStock.value = '0';
+        loadAllProductsForStock();
+        const catId = categorySelect.value;
+        loadProductsByCategory(catId);
+    } else {
+        showError(addProductMessage, `Ошибка: ${data.error}`);
+    }
+});
+
+// ---- ПЕРЕКЛЮЧЕНИЕ МЕЖДУ КАССОЙ И СКЛАДОМ ----
+function switchMode(mode) {
+    if (mode === 'cash') {
+        cashMode.classList.add('active');
+        stockMode.classList.remove('active');
+        modeCashBtn.classList.add('active');
+        modeStockBtn.classList.remove('active');
+        cashierSelectContainer.style.display = 'flex';
+    } else {
+        cashMode.classList.remove('active');
+        stockMode.classList.add('active');
+        modeCashBtn.classList.remove('active');
+        modeStockBtn.classList.add('active');
+        cashierSelectContainer.style.display = 'none';
+        loadAllProductsForStock(); // загружаем таблицу при первом открытии
+    }
+}
+modeCashBtn.addEventListener('click', () => switchMode('cash'));
+modeStockBtn.addEventListener('click', () => switchMode('stock'));
+
+// ---- ИНИЦИАЛИЗАЦИЯ ----
 setDefaultDates();
 initStatsTabs();
 loadCashiers();

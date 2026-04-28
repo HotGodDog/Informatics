@@ -226,3 +226,102 @@ button:hover {
     font-style: italic;
     padding: 10px;
 }
+
+/* Кнопки переключения режимов (Касса / Склад) */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.mode-switch {
+    display: flex;
+    gap: 10px;
+}
+.mode-btn {
+    background: #f0f0f0;
+    color: #333;
+    border: none;
+    padding: 8px 20px;
+    font-size: 1rem;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.mode-btn.active {
+    background: #4CAF50;
+    color: white;
+}
+.mode-content {
+    display: none;
+}
+.mode-content.active {
+    display: block;
+}
+.cashier-select {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+/* Стили для склада */
+.stock-add-form {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 15px;
+}
+.form-row label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-weight: normal;
+}
+.form-row input, .form-row select {
+    padding: 6px;
+    font-size: 1rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+.stock-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+.stock-list th, .stock-list td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+.stock-list th {
+    background-color: #f2f2f2;
+}
+.stock-list input[type="number"] {
+    width: 80px;
+    padding: 4px;
+}
+.replenish-btn {
+    background: #2196F3;
+    color: white;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.replenish-btn:hover {
+    background: #0b7dda;
+}
+.stock-filter {
+    margin-bottom: 15px;
+}
+.stock-filter input {
+    padding: 6px;
+    width: 250px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
